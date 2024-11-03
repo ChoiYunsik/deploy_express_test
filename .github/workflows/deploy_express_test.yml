@@ -1,0 +1,37 @@
+name: Deploy to cloudtype
+on:
+  push:
+    branches:
+      - master
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Connect deploy key
+        uses: cloudtype-github-actions/connect@v1
+        with:
+          token: ${{ secrets.CLOUDTYPE_TOKEN }}
+          ghtoken: ${{ secrets.GHP_TOKEN }}
+      - name: Deploy
+        uses: cloudtype-github-actions/deploy@v1
+        with:
+          token: ${{ secrets.CLOUDTYPE_TOKEN }}
+          project: ykuranus/deploy-express-test
+          stage: main
+          yaml: |
+            name: lovegan
+            app: node@20
+            options:
+              ports: "8000"
+              install: npm ci --production
+              start: node app.js
+              env:
+                - name: CONNECT_URL
+                  value: mongodb+srv://app:1234@app.fhkup.mongodb.net/
+              buildenv: []
+            context:
+              git:
+                url: git@github.com:${{ github.repository }}.git
+                ref: ${{ github.ref }}
